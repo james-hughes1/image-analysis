@@ -1,0 +1,8 @@
+# LaTeX Compilation
+*.aux
+*.bbl
+*.blg
+*.log
+*.synctex.gz
+*.toc
+*.out
