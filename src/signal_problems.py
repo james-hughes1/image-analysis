@@ -12,6 +12,33 @@ from imagetools.signals import (
     idwt2,
 )
 
+# L1 and L2 Regression
+# Import data
+with open("data/y_line.txt") as f:
+    file_list = f.read().split("\n")[:-1]
+    y_noisy = np.array([float(x) for x in file_list])
+
+with open("data/y_outlier_line.txt") as f:
+    file_list = f.read().split("\n")[:-1]
+    y_outlier = np.array([float(x) for x in file_list])
+
+x = np.arange(len(y_noisy))
+
+# L2 optimisation
+a_noisy_l2 = np.sum(x * y_noisy) / np.sum(x * x)
+b_noisy_l2 = np.mean(y_noisy) - a_noisy_l2 * np.mean(x)
+
+a_outlier_l2 = np.sum(x * y_outlier) / np.sum(x * x)
+b_outlier_l2 = np.mean(y_outlier) - a_outlier_l2 * np.mean(x)
+
+# Plot
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+ax[0].scatter(x, y_noisy)
+ax[0].plot(x, a_noisy_l2 * x + b_noisy_l2)
+ax[1].scatter(x, y_outlier)
+ax[1].plot(x, a_outlier_l2 * x + b_outlier_l2)
+plt.savefig("outputs/regression_l2.png")
+
 # Create a sparse signal with small Gaussian noise.
 rng = np.random.default_rng(seed=42)
 signal = np.zeros(100)
