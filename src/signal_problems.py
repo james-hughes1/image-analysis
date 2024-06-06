@@ -43,6 +43,7 @@ ax[1].set_title(f"a={a_outlier_l2:4f} b={a_outlier_l2:.4f}")
 plt.savefig("outputs/regression_l2.png")
 
 # L1 optimisation
+
 B_coefs = []
 
 for i, y in enumerate([y_noisy, y_outlier]):
@@ -104,20 +105,24 @@ signal_unif = ifft1c(sample_unif) * sample_freq
 
 fig, ax = plt.subplots(2, 3, figsize=(15, 10))
 ax[0, 0].plot(abs(data))
-ax[0, 0].set_title("measurements")
+ax[0, 0].set_title("Measurements")
 ax[0, 1].plot(abs(sample_random))
+ax[0, 1].set_title("Random Sample")
 ax[0, 2].plot(abs(sample_unif))
+ax[0, 2].set_title("Equidistant Sample")
 ax[1, 0].plot(abs(signal))
-ax[1, 0].set_title("signal")
+ax[1, 0].set_title("Signal")
 ax[1, 1].plot(abs(signal_random))
+ax[1, 1].set_title("Signal from Random Sample")
 ax[1, 2].plot(abs(signal_unif))
+ax[1, 2].set_title("Signal from Equidistant Sample")
 plt.savefig("outputs/signal.png")
 
 data_random_recon, mse_random = iterative_soft_thresholding(
-    sample_random, lam=5e-3, n_iters=100, gt=signal
+    sample_random, lam=1e-3, n_iters=100, sample_freq=sample_freq, gt=signal
 )
 data_unif_recon, mse_unif = iterative_soft_thresholding(
-    sample_unif, lam=1e-3, n_iters=100, gt=signal
+    sample_unif, lam=1e-3, n_iters=100, sample_freq=sample_freq, gt=signal
 )
 
 signal_random_recon = ifft1c(data_random_recon) * sample_freq
@@ -127,11 +132,19 @@ fig, ax = plt.subplots(2, 2, figsize=(10, 10))
 ax[0, 0].plot(abs(signal_random_recon), label="random")
 ax[0, 0].plot(abs(signal), label="gt")
 ax[0, 0].legend()
+ax[0, 0].set_title("Reconstructed Signal: Random")
 ax[0, 1].plot(abs(signal_unif_recon), label="unif")
 ax[0, 1].plot(abs(signal), label="gt")
 ax[0, 1].legend()
+ax[0, 1].set_title("Reconstructed Signal: Equidistant")
 ax[1, 0].plot(mse_random)
+ax[1, 0].set(
+    title="L2 Loss of Signal Reconstruction", xlabel="Iteration", ylabel="Loss"
+)
 ax[1, 1].plot(mse_unif)
+ax[1, 1].set(
+    title="L2 Loss of Signal Reconstruction", xlabel="Iteration", ylabel="Loss"
+)
 plt.savefig("outputs/signal_reconstruct.png")
 
 # --- Image Compression via Wavelet Decomposition --- #

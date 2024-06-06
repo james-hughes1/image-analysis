@@ -23,17 +23,21 @@ def ComplexSoftThresh(y, lam):
     return cst
 
 
-def iterative_soft_thresholding(data_sampled, lam, n_iters, gt=None):
+def iterative_soft_thresholding(
+    data_sampled, lam, n_iters, sample_freq, gt=None
+):
     data = data_sampled.copy()
     mse_values = []
     for i in range(n_iters):
         signal = ifft1c(data)
+        if not (gt is None):
+            mse_values.append(
+                0.5 * np.sum(abs(signal * sample_freq - gt) ** 2)
+            )
         signal = ComplexSoftThresh(signal, lam=lam)  # Threshold
         data = fft1c(signal)
         # Data consistency step for measurements
         data = data * (data_sampled == 0) + data_sampled
-        if not (gt is None):
-            mse_values.append(0.5 * np.sum(abs(data - gt) ** 2))
     return data, mse_values
 
 
