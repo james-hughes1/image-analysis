@@ -4,6 +4,7 @@
 \author{James Hughes\\ Word count: 0}
 
 \usepackage{amsfonts}
+\usepackage{graphicx}
 
 \begin{document}
 
@@ -17,8 +18,65 @@
 
 \section{Introduction}
 
+\section{Image Segmentation}
 
-\section{Question 3}
+
+
+\subsection{CT Image}
+
+\begin{figure}[hp]
+    \includegraphics[scale=0.35]{figures/ct_segmentation.png}
+    \caption{Steps of CT Segmentation}
+    \label{fig:ct}
+\end{figure}
+
+The CT scan image was segmented using Otsu's method for image segmentation.
+This was an appropriate, simple method which is suited to the monochrome image.
+This method easily segments the tissue and bone surrounding the lungs,
+distinguishing this from the lugns themselves and the surrounding background.
+The segmented image was then post-processed with `binary closing', a morphological operation,
+as well as Scikit-Image's \texttt{morphology.remove\_small\_objects} method.
+The four segmented regions of the image were then labelled, and the lungs chosen as the smallest masks by area.
+
+\begin{figure}[hp]
+    \includegraphics[scale=0.35]{figures/flowers_segmentation.png}
+    \caption{Steps of CT Segmentation}
+    \label{fig:flowers}
+\end{figure}
+
+For the flowers image, a more sophisticated segmentation was required in order to handle the three colour channels of the pixels,
+as well as to produce a more complex segmentation mask composed of lots of small disconnected regions.
+Since the desired segmentation was to be based on the colours present in the image,
+it was less important to incorporate local pixel information into the image,
+therefore making clustering an appropriate strategy.
+In particular, KMeans was chosen, since this method was simple to implement,
+commonly used for image segmentation,
+and enabled a fixed number of clusters to be specified.
+In this case, six clusters was decided as a meaningful number,
+corresponding roughly to two shades of green (grass) and four flower colours.
+KMeans was implemented as a \texttt{class} in the \texttt{ml} module according to Lloyd's Algorithm \cite{lloyd},
+using the kmeans++ \cite{kmeanspp} centroid initialisation method.
+
+Based on this choice of algorithm, Total Variation denoising was used to pre-process the image.
+This meant that in the pre-processed image, pixel values were coerced to be similar to those nearby.
+This ensured that the clustering algorithm was more stable (since it artificially made the cluster structure of the data more pronounced),
+and that the segmentation masks weren't too fine-grained.
+
+The same morphological post-processing from the CT image was used again,
+in order to remove segmentation masks that were smaller than the flower buds.
+
+\begin{figure}[hp]
+    \includegraphics[scale=0.35]{figures/coins_segmentation.png}
+    \caption{Steps of CT Segmentation}
+    \label{fig:coins}
+\end{figure}
+
+\section{Exploiting Sparsity in Signal Processing}
+
+
+
+\section{Algorithms for Solving Inverse Problems}
+\subsection{Convergence of Gradient Descent}
 
 Gradient Descent.
 
