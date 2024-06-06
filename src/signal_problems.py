@@ -11,8 +11,9 @@ from imagetools.signals import (
     dwt2,
     idwt2,
 )
+from imagetools.ml import gradient_descent
 
-# L1 and L2 Regression
+# --- L1 and L2 Regression --- #
 # Import data
 with open("data/y_line.txt") as f:
     file_list = f.read().split("\n")[:-1]
@@ -35,10 +36,43 @@ b_outlier_l2 = np.mean(y_outlier) - a_outlier_l2 * np.mean(x)
 fig, ax = plt.subplots(1, 2, figsize=(10, 5))
 ax[0].scatter(x, y_noisy)
 ax[0].plot(x, a_noisy_l2 * x + b_noisy_l2)
+ax[0].set_title(f"a={a_noisy_l2:.4f} b={a_noisy_l2:.4f}")
 ax[1].scatter(x, y_outlier)
 ax[1].plot(x, a_outlier_l2 * x + b_outlier_l2)
+ax[1].set_title(f"a={a_outlier_l2:4f} b={a_outlier_l2:.4f}")
 plt.savefig("outputs/regression_l2.png")
 
+# L1 optimisation
+B_coefs = []
+
+for i, y in enumerate([y_noisy, y_outlier]):
+    obj_l1 = lambda B: np.sum(np.abs(B[0] * x + B[1] - y))
+    grad_l1 = lambda B: np.array(
+        [
+            np.dot(x, np.sign(B[0] * x + B[1] - y)),
+            np.sum(np.sign(B[0] * x + B[1] - y)),
+        ]
+    )
+
+    # Perform gradient descent
+    B0 = np.array([0.1, 0.1])
+    lr = 0.0001
+    B = gradient_descent(obj_l1, grad_l1, B0, 0, 0.01, lr, 100, "gd_l1")
+    B_coefs.append(B)
+
+[B_noisy, B_outlier] = B_coefs
+
+# Plot
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+ax[0].scatter(x, y_noisy)
+ax[0].plot(x, B_noisy[0] * x + B_noisy[1])
+ax[0].set_title(f"a={B_noisy[0]:.4f} b={B_noisy[1]:.4f}")
+ax[1].scatter(x, y_outlier)
+ax[1].plot(x, B_outlier[0] * x + B_outlier[1])
+ax[1].set_title(f"a={B_outlier[0]:.4f} b={B_outlier[1]:.4f}")
+plt.savefig("outputs/regression_l1.png")
+
+# --- Sparse Signal Reconstruction --- #
 # Create a sparse signal with small Gaussian noise.
 rng = np.random.default_rng(seed=42)
 signal = np.zeros(100)
@@ -100,8 +134,7 @@ ax[1, 0].plot(mse_random)
 ax[1, 1].plot(mse_unif)
 plt.savefig("outputs/signal_reconstruct.png")
 
-# Image Compression via Wavelet Decomposition
-
+# --- Image Compression via Wavelet Decomposition --- #
 # Read image
 river_img = skimage.io.imread("data/river_side.jpeg")
 river_img = rgb2gray(river_img)

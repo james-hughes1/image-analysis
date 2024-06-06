@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import skimage
 import itertools
 
-from imagetools.segmentation import KMeans_Custom
+from imagetools.ml import KMeans_Custom
 
 from skimage.filters import threshold_otsu, rank, unsharp_mask
 from skimage.morphology import (
