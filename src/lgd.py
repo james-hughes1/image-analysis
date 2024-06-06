@@ -8,8 +8,7 @@ import odl
 import odl.contrib.torch as odl_torch
 import matplotlib.pyplot as plt
 
-from skimage.metrics import peak_signal_noise_ratio as compare_psnr
-from skimage.metrics import structural_similarity as compare_ssim
+from imagetools.plotting import plot_image
 
 astra.test()
 
@@ -22,6 +21,7 @@ reco_space = odl.uniform_discr(
     shape=[img_size, img_size],
     dtype="float32",
 )
+
 # Make a parallel beam geometry with flat detector
 num_angles = 30
 geometry = odl.tomo.parallel_beam_geometry(reco_space, num_angles=num_angles)
@@ -33,42 +33,26 @@ fbp_op_odl = odl.tomo.fbp_op(
 )
 adj_op_odl = fwd_op_odl.adjoint
 
-
 # Create phantom and noisy projection data in ODL
 phantom_odl = odl.phantom.shepp_logan(reco_space, modified=True)
 data_odl = fwd_op_odl(phantom_odl)
 data_odl += odl.phantom.white_noise(fwd_op_odl.range) * np.mean(data_odl) * 0.1
 fbp_odl = fbp_op_odl(data_odl)
 
-# convert the image and the sinogram to numpy arrays
+# Convert the image and the sinogram to numpy arrays
 phantom_np = phantom_odl.__array__()
 fbp_np = fbp_odl.__array__()
 data_np = data_odl.__array__()
 print("sinogram size = {}".format(data_np.shape))
 
-# display ground-truth and FBP images
-plt.subplot(131)
-plt.imshow(phantom_np.transpose(), cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("ground-truth")
+# Display ground-truth and FBP images
+fig, ax = plt.subplots(1, 3, figsize=(9, 6))
 
-plt.subplot(132)
-plt.imshow(data_np, cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("sinogram")
+plot_image(ax[0], phantom_np.T, "ground-truth", "bone")
+plot_image(ax[1], data_np, "sinogram", "bone")
+plot_image(ax[2], fbp_np.T, "FBP", "bone", gt=phantom_np.T)
 
-plt.subplot(133)
-plt.imshow(fbp_np.transpose(), cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("FBP")
-data_range = np.max(phantom_np) - np.min(phantom_np)
-psnr_fbp = compare_psnr(phantom_np, fbp_np, data_range=data_range)
-ssim_fbp = compare_ssim(phantom_np, fbp_np, data_range=data_range)
-plt.xlabel("PSNR: {:.2f} dB, SSIM: {:.2f}".format(psnr_fbp, ssim_fbp))
-plt.gcf().set_size_inches(9.0, 6.0)
+plt.savefig("outputs/fbp.png")
 
 # Let's solve the TV reconstruction problem using linearized ADMM
 
@@ -124,30 +108,13 @@ odl.solvers.admm_linearized(
 x_admm_np = x_admm_odl.__array__()
 
 # Let's display the image reconstructed by ADMM and compare it with FBP
-plt.subplot(131)
-plt.imshow(phantom_np.transpose(), cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("ground-truth")
+fig, ax = plt.subplots(1, 3, figsize=(9, 6))
 
-plt.subplot(132)
-plt.imshow(fbp_np.transpose(), cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("FBP")
-plt.xlabel("PSNR: {:.2f} dB, SSIM: {:.2f}".format(psnr_fbp, ssim_fbp))
+plot_image(ax[0], phantom_np.T, "ground-truth", "bone")
+plot_image(ax[1], fbp_np.T, "FBP", "bone", gt=phantom_np.T)
+plot_image(ax[2], x_admm_np.T, "TV", "bone", gt=phantom_np.T)
 
-
-plt.subplot(133)
-plt.imshow(x_admm_np.transpose(), cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("TV")
-psnr_tv = compare_psnr(phantom_np, x_admm_np, data_range=data_range)
-ssim_tv = compare_ssim(phantom_np, x_admm_np, data_range=data_range)
-plt.xlabel("PSNR: {:.2f} dB, SSIM: {:.2f}".format(psnr_tv, ssim_tv))
-plt.gcf().set_size_inches(9.0, 6.0)
-
+plt.savefig("outputs/admm.png")
 
 # Now, we will "train" learned gradient descent (LGD) network on this specific
 # image to show the potential of data-driven reconstruction.
@@ -156,12 +123,13 @@ plt.gcf().set_size_inches(9.0, 6.0)
 # many images, and then test the performance on a new test image (that was not
 # a part of your training dataset).
 
+# Find processing device, preferring GPU if possible.
 device = (
     torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 )
 
 
-# first, let's create a CNN that replaces the prox operator in PGD.
+# First, let's create a CNN that replaces the prox operator in PGD.
 class prox_net(nn.Module):
     def __init__(
         self, n_in_channels=2, n_out_channels=1, n_filters=32, kernel_size=3
@@ -247,9 +215,9 @@ num_learnable_params = sum(
 print("number of model parameters = {}".format(num_learnable_params))
 y = (
     torch.from_numpy(data_np).to(device).unsqueeze(0)
-)  # noisy sinogram data as a torch tensor
+)  # Noisy sinogram data as a torch tensor
 
-# initialization for the LGD net. Note that the input to a torch 2D CNN must
+# Initialization for the LGD net. Note that the input to a torch 2D CNN must
 # be of size (num_batches x height x width).
 x_init = (
     torch.from_numpy(
@@ -261,14 +229,14 @@ x_init = (
 
 ground_truth = (
     torch.from_numpy(phantom_np).to(device).unsqueeze(0)
-)  # target ground-truth as a torch tensor
+)  # Target ground-truth as a torch tensor
 
-# define the loss and the optimizer
+# Define the loss and the optimizer
 mse_loss = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(lgd_net.parameters(), lr=1e-4)
 num_epochs = 2000
 
-# training loop
+# Training loop
 for epoch in range(0, num_epochs):
     optimizer.zero_grad()
     """################## YOUR CODE HERE #################### """
@@ -280,44 +248,22 @@ for epoch in range(0, num_epochs):
     loss.backward()
     optimizer.step()
 
-    if epoch % 1 == 0:
+    if epoch % 100 == 0:
         print("epoch = {}, loss = {}".format(epoch, loss.item()))
 
 lgd_recon_np = (
     recon.detach().cpu().numpy().squeeze()
-)  # convert the LGD reconstruction to numpy format
+)  # Convert the LGD reconstruction to numpy format
 ###############################################
+
 # Let's display the reconstructed images by LGD and compare it with FBP and
 # ADMM
-plt.subplot(141)
-plt.imshow(phantom_np.transpose(), cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("ground-truth")
 
-plt.subplot(142)
-plt.imshow(fbp_np.transpose(), cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("FBP")
-plt.xlabel("PSNR: {:.2f} dB, SSIM: {:.2f}".format(psnr_fbp, ssim_fbp))
+fig, ax = plt.subplots(1, 4, figsize=(12, 6))
 
+plot_image(ax[0], phantom_np.T, "ground-truth", "bone")
+plot_image(ax[1], fbp_np.T, "FBP", "bone", gt=phantom_np.T)
+plot_image(ax[2], x_admm_np.T, "TV", "bone", gt=phantom_np.T)
+plot_image(ax[3], lgd_recon_np.T, "LGD", "bone", gt=phantom_np.T)
 
-plt.subplot(143)
-plt.imshow(x_admm_np.transpose(), cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("TV")
-plt.xlabel("PSNR: {:.2f} dB, SSIM: {:.2f}".format(psnr_tv, ssim_tv))
-plt.gcf().set_size_inches(9.0, 6.0)
-
-
-plt.subplot(144)
-plt.imshow(lgd_recon_np.transpose(), cmap="bone")
-plt.xticks([])
-plt.yticks([])
-plt.title("LGD")
-psnr_lgd = compare_psnr(phantom_np, lgd_recon_np, data_range=data_range)
-ssim_lgd = compare_ssim(phantom_np, lgd_recon_np, data_range=data_range)
-plt.xlabel("PSNR: {:.2f} dB, SSIM: {:.2f}".format(psnr_lgd, ssim_lgd))
-plt.gcf().set_size_inches(12.0, 6.0)
+plt.savefig("outputs/lgd.png")

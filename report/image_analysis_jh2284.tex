@@ -3,6 +3,8 @@
 \title{Image Analysis Coursework}
 \author{James Hughes\\ Word count: 0}
 
+\usepackage{amsfonts}
+
 \begin{document}
 
 \maketitle
@@ -14,6 +16,30 @@
 \newpage
 
 \section{Introduction}
+
+
+\section{Question 3}
+
+Gradient Descent.
+
+We can prove that the given function $f:\mathbb{R}^2\rightarrow\mathbb{R}$ defined
+
+\[f(x_1,x_2) = x_1^2 + \frac{x_2^2}{2}\]
+
+is $L$-smooth with $L=2$ via the following
+
+The result given is, for learning rate $\eta=\frac{1}{L}$, and an $L$-smooth function $f$,
+
+\[f(x_K) - f(x^*) \leq \frac{L||x_0-x^*||_2^2}{2K}\]
+
+It is important to note that this is an estimate that gives the accuracy as $\mathcal{O}(\frac{1}{K})$.
+We can use it to compute the estimate the number of steps to required to reach $\epsilon=0.01$,
+but this will be an upper bound.
+Nonetheless, we can set the right-hand side to $\epsilon$ and rearrange to give:
+
+\[K = \frac{L||x_0-x^*||_2^2}{2\epsilon}\]
+
+Substituting $\epsilon=0.01$, $x^*=(0,0)$, $x_0=(1,1)$, $L=2$, we get $K=200$.
 
 \section{Discussion}
 Results/conclusions
@@ -29,4 +55,3 @@ How I could have improved \cite{keypaper}
 \section{Statement on the use of auto-generation tools}
 
 \end{document}
-
