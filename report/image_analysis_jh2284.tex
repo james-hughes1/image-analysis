@@ -4,6 +4,7 @@
 \author{James Hughes\\ Word count: 0}
 
 \usepackage{amsfonts}
+\usepackage{amsmath}
 \usepackage{graphicx}
 
 \begin{document}
@@ -19,8 +20,6 @@
 \section{Introduction}
 
 \section{Image Segmentation}
-
-
 
 \subsection{CT Image}
 
@@ -38,9 +37,11 @@ The segmented image was then post-processed with `binary closing', a morphologic
 as well as Scikit-Image's \texttt{morphology.remove\_small\_objects} method.
 The four segmented regions of the image were then labelled, and the lungs chosen as the smallest masks by area.
 
+\subsection{Flowers Image}
+
 \begin{figure}[hp]
     \includegraphics[scale=0.35]{figures/flowers_segmentation.png}
-    \caption{Steps of CT Segmentation}
+    \caption{Steps of Flowers Segmentation}
     \label{fig:flowers}
 \end{figure}
 
@@ -65,9 +66,43 @@ and that the segmentation masks weren't too fine-grained.
 The same morphological post-processing from the CT image was used again,
 in order to remove segmentation masks that were smaller than the flower buds.
 
+\subsection{Coins Image}
+
+A strong degree of preprocessing was helpful for this image, to assist the segmentation algorithm.
+Firstly, the image has been corrupted with vertical columns of pixels that have been masked with zero values.
+This was addressed by applying a local median filter.
+The locality of this filter was set to each pixel plus its 6 closest horizontal neighbours.
+This was wide enough to ensure that in most cases the majority of these 7 pixels are not corrupted,
+even in regions where the image is affected more strongly.
+An unsharp filter is then used to increase the difference in pixel values within the coin regions compared to just outside of these regions.
+
+To segment all of the coins, the Chan-Vese \cite{chanvese} segmentation algorithm was used.
+This method relies on the iterative minimisation of an energy function,
+which describes the desired segmentation properties mathematically.
+In particular, this technique models the segmentation mask as the set ${x\in\Omega:\phi(x)>0}$,
+where $\Omega\subset\mathbb{R}^2$ is the space representing the image,
+and $\phi:\Omega\rightarrow[0,1]$ is a function which evolves over the course of the computation.
+The function is evolved iteratively to minimise the objective
+
+\begin{align*}
+    F(\phi, c_1, c_2) = & \mu\int_{\Omega}\delta(\phi)|\nabla\phi|dxdy + \nu\int_{\Omega}H(\phi)dxdy \\
+                    & + \lambda_1\int_{\Omega}|u_0-c_1|^2H(\phi)dxdy + \lambda_2\int_{\Omega}|u_0-c_2|^2(1-H(\phi))dxdy \\
+\end{align*}
+
+where $\mu,\nu,\lambda_1,\lambda_2$ are all fixed hyperparameters.
+The first two terms serve to regularise the segmentation,
+by minimising the length of the segmentation boundary and the segmented area respectively (the area term is ignored in the code).
+The second two terms seek to minimise the deviations of pixel values within, and outside, the segmented area from two distinct `representative values',
+$c_1$ and $c_2$.
+It is worth noting that for any $\phi$, these values minimise the energy when they are the average pixel values in the two corresponding areas of the image.
+
+The algorithm highlighted the background of the image.
+Thus to get masks of the coins, the segmentation values were permuted in ${0,1}$ and the segmentation was again post-processed with a morphological closing operation.
+The masks were then labelled, and the correct labels were identified via `test pixels', which are seen marking the original image (top-left) in yellow in Figure \ref{fig:coins}
+
 \begin{figure}[hp]
     \includegraphics[scale=0.35]{figures/coins_segmentation.png}
-    \caption{Steps of CT Segmentation}
+    \caption{Steps of Coins Segmentation}
     \label{fig:coins}
 \end{figure}
 
