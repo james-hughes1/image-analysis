@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import skimage
 
-from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.color import rgb2gray
 from imagetools.signals import (
     ifft1c,
@@ -12,6 +11,7 @@ from imagetools.signals import (
     idwt2,
 )
 from imagetools.ml import gradient_descent
+from imagetools.plotting import plot_image
 
 # --- L1 and L2 Regression --- #
 # Import data
@@ -40,6 +40,7 @@ ax[0].set_title(f"a={a_noisy_l2:.4f} b={a_noisy_l2:.4f}")
 ax[1].scatter(x, y_outlier)
 ax[1].plot(x, a_outlier_l2 * x + b_outlier_l2)
 ax[1].set_title(f"a={a_outlier_l2:4f} b={a_outlier_l2:.4f}")
+plt.tight_layout()
 plt.savefig("report/figures/regression_l2.png")
 
 # L1 optimisation
@@ -71,6 +72,7 @@ ax[0].set_title(f"a={B_noisy[0]:.4f} b={B_noisy[1]:.4f}")
 ax[1].scatter(x, y_outlier)
 ax[1].plot(x, B_outlier[0] * x + B_outlier[1])
 ax[1].set_title(f"a={B_outlier[0]:.4f} b={B_outlier[1]:.4f}")
+plt.tight_layout()
 plt.savefig("report/figures/regression_l1.png")
 
 # --- Sparse Signal Reconstruction --- #
@@ -116,6 +118,7 @@ ax[1, 1].plot(abs(signal_random))
 ax[1, 1].set_title("Signal from Random Sample")
 ax[1, 2].plot(abs(signal_unif))
 ax[1, 2].set_title("Signal from Equidistant Sample")
+plt.tight_layout()
 plt.savefig("report/figures/signal.png")
 
 data_random_recon, mse_random = iterative_soft_thresholding(
@@ -145,6 +148,7 @@ ax[1, 1].plot(mse_unif)
 ax[1, 1].set(
     title="L2 Loss of Signal Reconstruction", xlabel="Iteration", ylabel="Loss"
 )
+plt.tight_layout()
 plt.savefig("report/figures/signal_reconstruct.png")
 
 # --- Image Compression via Wavelet Decomposition --- #
@@ -158,12 +162,13 @@ river_img_recon = idwt2(river_img_dw)
 
 fig, ax = plt.subplots(1, 3, figsize=(15, 5))
 
-ax[0].imshow(river_img, cmap="grey")
-ax[0].axis("off")
-ax[1].imshow(river_img_recon, cmap="grey")
-ax[1].axis("off")
-ax[2].imshow(abs(river_img_recon - river_img))
-ax[2].axis("off")
+plot_image(ax[0], river_img, "Original", "grey")
+plot_image(ax[1], river_img_recon, "Reconstruction", "grey", gt=river_img)
+plot_image(
+    ax[2], abs(river_img_recon - river_img), "Absolute difference", "grey"
+)
+
+plt.tight_layout()
 plt.savefig("report/figures/river_img.png")
 
 for fr in [0.2, 0.15, 0.1, 0.05, 0.025]:
@@ -171,16 +176,19 @@ for fr in [0.2, 0.15, 0.1, 0.05, 0.025]:
     th = np.quantile(river_img_dw, 1 - fr)
     river_img_dw = np.clip(river_img_dw, th, None)
     river_img_recon = idwt2(river_img_dw)
-    fig, ax = plt.subplots(1, 3, figsize=(15, 20))
-    ax[0].imshow(river_img, cmap="grey")
-    ax[0].axis("off")
+    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
 
-    ax[1].imshow(river_img_recon, cmap="grey")
-    ax[1].axis("off")
-    ax[1].set_title(
-        f"Top {fr*100}% psnr={psnr(river_img, river_img_recon):.2f}"
+    plot_image(ax[0], river_img, "Original", "grey")
+    plot_image(
+        ax[1],
+        river_img_recon,
+        f"Reconstruction (Top {fr*100}% of WT)",
+        "grey",
+        gt=river_img,
+    )
+    plot_image(
+        ax[2], abs(river_img_recon - river_img), "Absolute difference", "grey"
     )
 
-    ax[2].imshow(abs(river_img_recon - river_img))
-    ax[2].axis("off")
+    plt.tight_layout()
     plt.savefig(f"report/figures/river_img_compressed_{fr:.3f}.png")

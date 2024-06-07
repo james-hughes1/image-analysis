@@ -104,5 +104,6 @@ def gradient_descent(obj, grad, x0, obj_min, eps, lr, max_iters, filename):
     ax[1].set(
         title="Objective Function Value", xlabel="Iteration", ylabel="Value"
     )
+    plt.tight_layout()
     plt.savefig(f"report/figures/{filename}.png")
     return x
