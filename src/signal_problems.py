@@ -40,7 +40,7 @@ ax[0].set_title(f"a={a_noisy_l2:.4f} b={a_noisy_l2:.4f}")
 ax[1].scatter(x, y_outlier)
 ax[1].plot(x, a_outlier_l2 * x + b_outlier_l2)
 ax[1].set_title(f"a={a_outlier_l2:4f} b={a_outlier_l2:.4f}")
-plt.savefig("outputs/regression_l2.png")
+plt.savefig("report/figures/regression_l2.png")
 
 # L1 optimisation
 
@@ -71,7 +71,7 @@ ax[0].set_title(f"a={B_noisy[0]:.4f} b={B_noisy[1]:.4f}")
 ax[1].scatter(x, y_outlier)
 ax[1].plot(x, B_outlier[0] * x + B_outlier[1])
 ax[1].set_title(f"a={B_outlier[0]:.4f} b={B_outlier[1]:.4f}")
-plt.savefig("outputs/regression_l1.png")
+plt.savefig("report/figures/regression_l1.png")
 
 # --- Sparse Signal Reconstruction --- #
 # Create a sparse signal with small Gaussian noise.
@@ -116,7 +116,7 @@ ax[1, 1].plot(abs(signal_random))
 ax[1, 1].set_title("Signal from Random Sample")
 ax[1, 2].plot(abs(signal_unif))
 ax[1, 2].set_title("Signal from Equidistant Sample")
-plt.savefig("outputs/signal.png")
+plt.savefig("report/figures/signal.png")
 
 data_random_recon, mse_random = iterative_soft_thresholding(
     sample_random, lam=1e-3, n_iters=100, sample_freq=sample_freq, gt=signal
@@ -145,7 +145,7 @@ ax[1, 1].plot(mse_unif)
 ax[1, 1].set(
     title="L2 Loss of Signal Reconstruction", xlabel="Iteration", ylabel="Loss"
 )
-plt.savefig("outputs/signal_reconstruct.png")
+plt.savefig("report/figures/signal_reconstruct.png")
 
 # --- Image Compression via Wavelet Decomposition --- #
 # Read image
@@ -164,7 +164,7 @@ ax[1].imshow(river_img_recon, cmap="grey")
 ax[1].axis("off")
 ax[2].imshow(abs(river_img_recon - river_img))
 ax[2].axis("off")
-plt.savefig("outputs/river_img.png")
+plt.savefig("report/figures/river_img.png")
 
 for fr in [0.2, 0.15, 0.1, 0.05, 0.025]:
     river_img_dw = dwt2(river_img)
@@ -183,4 +183,4 @@ for fr in [0.2, 0.15, 0.1, 0.05, 0.025]:
 
     ax[2].imshow(abs(river_img_recon - river_img))
     ax[2].axis("off")
-    plt.savefig(f"outputs/river_img_compressed_{fr:.3f}.png")
+    plt.savefig(f"report/figures/river_img_compressed_{fr:.3f}.png")

@@ -52,7 +52,7 @@ plot_image(ax[0], phantom_np.T, "ground-truth", "bone")
 plot_image(ax[1], data_np, "sinogram", "bone")
 plot_image(ax[2], fbp_np.T, "FBP", "bone", gt=phantom_np.T)
 
-plt.savefig("outputs/fbp.png")
+plt.savefig("report/figures/fbp.png")
 
 # Let's solve the TV reconstruction problem using linearized ADMM
 
@@ -114,7 +114,7 @@ plot_image(ax[0], phantom_np.T, "ground-truth", "bone")
 plot_image(ax[1], fbp_np.T, "FBP", "bone", gt=phantom_np.T)
 plot_image(ax[2], x_admm_np.T, "TV", "bone", gt=phantom_np.T)
 
-plt.savefig("outputs/admm.png")
+plt.savefig("report/figures/admm.png")
 
 # Now, we will "train" learned gradient descent (LGD) network on this specific
 # image to show the potential of data-driven reconstruction.
@@ -266,4 +266,4 @@ plot_image(ax[1], fbp_np.T, "FBP", "bone", gt=phantom_np.T)
 plot_image(ax[2], x_admm_np.T, "TV", "bone", gt=phantom_np.T)
 plot_image(ax[3], lgd_recon_np.T, "LGD", "bone", gt=phantom_np.T)
 
-plt.savefig("outputs/lgd.png")
+plt.savefig("report/figures/lgd.png")

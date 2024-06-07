@@ -16,13 +16,21 @@ class KMeans_Custom:
         return labels
 
     def fit(self, data, verbose=10, limit=1e5):
-        """Based on [reference]"""
+        """D. MacKay, “An Example Inference Task: Clustering” in Information
+        Theory, Inference and Learning Algorithms, Cambridge University Press,
+        2003, ch. 20, pp. 284-292, Algorithm 20.2."""
         rng = np.random.default_rng(seed=42)
 
-        # Initialisation
+        # Initialise problem variables
         N, P = data.shape
 
-        # kmeans++
+        # KMeans++ initialisation
+        # ----------------------------------------------------------
+        # D. Arthur and S. Vassilvitskii, “k-means++: the advantages of
+        # careful seeding,” in Proceedings of the Eighteenth Annual ACM-SIAM
+        # Symposium on Discrete Algorithms, ser. SODA ’07. USA: Society for
+        # Industrial and Applied Mathematics, 2007, pp. 1027–1035
+        # -----------------------------------------------------------
         centroids = np.zeros((self.K, P))
         centroids[0, :] = data[rng.choice(list(range(N))), :]
         for k in range(1, self.K):
@@ -37,8 +45,14 @@ class KMeans_Custom:
 
         labels = self.assignment(data)
 
-        converged = False
+        # Lloyd's Algorithm
+        # ----------------------------------------------------------
+        # D. MacKay, “An Example Inference Task: Clustering” in Information
+        # Theory, Inference and Learning Algorithms, Cambridge University
+        # Press, 2003, ch. 20, pp. 284-292, Algorithm 20.2.
+        # ----------------------------------------------------------
 
+        converged = False
         iteration = 0
         while not converged and iteration < limit:
             iteration += 1
@@ -90,5 +104,5 @@ def gradient_descent(obj, grad, x0, obj_min, eps, lr, max_iters, filename):
     ax[1].set(
         title="Objective Function Value", xlabel="Iteration", ylabel="Value"
     )
-    plt.savefig(f"outputs/{filename}.png")
+    plt.savefig(f"report/figures/{filename}.png")
     return x

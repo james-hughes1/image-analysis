@@ -16,6 +16,7 @@ from skimage.morphology import (
 from skimage.restoration import denoise_tv_bregman
 from skimage.color import rgba2rgb, rgb2gray
 from skimage.segmentation import chan_vese
+from skimage.measure import regionprops
 
 
 # CT Lung segmentation
@@ -38,7 +39,13 @@ ax[0, 2].imshow(ct_mask)
 
 # Show segmented lungs
 ct_labelled = label(ct_mask == 0)
-ct_labelled = 0.7 * (ct_labelled == 2) + (ct_labelled == 3)
+
+ct_props = regionprops(ct_labelled)
+lung_idx = sorted(list(range(3)), key=lambda i: ct_props[i].area)[:2]
+
+ct_labelled = 0.7 * (ct_labelled == lung_idx[0] + 1) + (
+    ct_labelled == lung_idx[1] + 1
+)
 ax[1, 0].imshow(ct_labelled, cmap="jet")
 
 # Show original image with segmentation mask
@@ -47,7 +54,8 @@ ax[1, 1].imshow(0.1 * ct_img + 0.9 * ct_img * (ct_labelled > 0))
 for p in itertools.product(list(range(2)), list(range(3))):
     ax[p].axis("off")
 
-plt.savefig("outputs/ct_segmentation.png")
+plt.tight_layout()
+plt.savefig("report/figures/ct_segmentation.png")
 
 # Coins segmentation
 fig, ax = plt.subplots(2, 3, figsize=(15, 10))
@@ -56,7 +64,15 @@ fig, ax = plt.subplots(2, 3, figsize=(15, 10))
 coins_img = skimage.io.imread("data/coins.png")
 coins_img = rgb2gray(rgba2rgb(coins_img))
 coins_img = (coins_img * 255).astype("uint8")
-ax[0, 0].imshow(coins_img)
+
+# Mark desired coins in order to choose masks later
+coins_marked = coins_img.copy()
+coins_marked[50:55, 40:45] = 255
+coins_marked[125:130, 100:105] = 255
+coins_marked[200:205, 160:165] = 255
+coins_marked[275:280, 240:245] = 255
+
+ax[0, 0].imshow(coins_marked)
 
 # Pre-processing
 coins_pre = rank.median(coins_img, np.ones((1, 7)))
@@ -69,8 +85,17 @@ se = disk(3)
 coins_segmented = binary_closing(coins_segmented, se)
 ax[0, 2].imshow(coins_segmented)
 
+coins_labelled = label(coins_segmented)
+
+desired_coins_idx = [
+    coins_labelled[50, 40],
+    coins_labelled[125, 100],
+    coins_labelled[200, 160],
+    coins_labelled[275, 240],
+]
+
 # Show desired coins
-coins_labelled = np.isin(label(coins_segmented), [6, 12, 18, 23])
+coins_labelled = np.isin(coins_labelled, desired_coins_idx)
 ax[1, 0].imshow(coins_labelled)
 
 # Show original image with segmentation mask
@@ -79,7 +104,8 @@ ax[1, 1].imshow(0.2 * coins_img + 0.8 * coins_img * coins_labelled)
 for p in itertools.product(list(range(2)), list(range(3))):
     ax[p].axis("off")
 
-plt.savefig("outputs/coins_segmentation.png")
+plt.tight_layout()
+plt.savefig("report/figures/coins_segmentation.png")
 
 # Flowers segmentation
 fig, ax = plt.subplots(2, 3, figsize=(15, 10))
@@ -120,4 +146,5 @@ ax[1, 1].imshow(
 for p in itertools.product(list(range(2)), list(range(3))):
     ax[p].axis("off")
 
-plt.savefig("outputs/flowers_segmentation.png")
+plt.tight_layout()
+plt.savefig("report/figures/flowers_segmentation.png")
