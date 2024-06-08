@@ -6,6 +6,7 @@
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{bm}
 
 \begin{document}
 
@@ -147,7 +148,7 @@ The Subgradient Method is similar to usual gradient descent, but extended to non
 We must replace the usual gradient term for the step direction with a non-unique `subgradient', a function $g:\mathbb{R}^2\rightarrow\mathbb{R}^2$ satisfying
 \[f(x')\geq f(x) + g(x)^T(x'-x) \quad \forall x, x' \in\mathbb{R}^2\]
 
-All convex functions such as the L1 objective permit at least a subgradient if not a true derivative \cite{convex},
+All continuous convex functions such as the L1 objective permit at least a subgradient if not a true derivative \cite{convex},
 and indeed the subgradient is only non-unique at points where the function is non-differentiable.
 The subgradient chosen was based on a choice of subgradient for the function $z\rightarrow|z|$,
 namely
@@ -269,37 +270,99 @@ the representation still encodes meaningful features relating to the image - thi
     \label{fig:wavelet_transform}
 \end{figure}
 
-As a result, clipping coefficients whose absolute value is below this threshold and then performing the inverse transform will
+As a result, zero-filling coefficients whose absolute value is below this threshold and then performing the inverse transform produces an image which is highly faithful to the original,
+but also requires dramatically less digital storage space, if we properly exploit the sparse representation to save the image.
+This is the essence of image compression techniques.
+The results of this compression can be seen at different threshold values in Figures \ref{fig:river_3pct}, \ref{fig:river_10pct}, and \ref{fig:river_20pct},
+with more examples in the \texttt{/report/figures} folder.
 
+\begin{figure}[hp]
+    \includegraphics[scale=0.35]{figures/river_img_compressed_0.025.png}
+    \caption{Compression from removing 97.5\% of wavelet information}
+    \label{fig:river_3pct}
+\end{figure}
 
+\begin{figure}[hp]
+    \includegraphics[scale=0.35]{figures/river_img_compressed_0.100.png}
+    \caption{Compression from removing 90.0\% of wavelet information}
+    \label{fig:river_10pct}
+\end{figure}
+
+\begin{figure}[hp]
+    \includegraphics[scale=0.35]{figures/river_img_compressed_0.200.png}
+    \caption{Compression from removing 80.0\% of wavelet information}
+    \label{fig:river_20pct}
+\end{figure}
+
+Strikingly, we see that even the extreme compression in Figure \ref{fig:river_3pct} is fairly faithful visually to the original.
+However, the more intense the compression process, the further the image is degraded.
+As we remove increasing amounts of wavelet-domain data, the difference image changes from a `blur' in the central region,
+to showing the worst errors concentrated around the high-frequency features of the images (details like edges and corners).
+In Figure \ref{fig:river_3pct} this is most obvious for the leaves of the tree and its shadow,
+which loses some fidelity in the compressed image and becomes more blurred.
 
 \section{Algorithms for Solving Inverse Problems}
 \subsection{Convergence of Gradient Descent}
 
-Gradient Descent.
+When applied to a convex, $L$-smooth objective function $f$ with learning rate $\eta=\frac{1}{L}$,
+gradient descent is guaranteed to converge with accuracy
 
-We can prove that the given function $f:\mathbb{R}^2\rightarrow\mathbb{R}$ defined
+\[f(\bm{x}_K) - f(\bm{x}^*) \leq \frac{L||\bm{x}_0-\bm{x}^*||_2^2}{2K}\]
 
-\[f(x_1,x_2) = x_1^2 + \frac{x_2^2}{2}\]
-
-is $L$-smooth with $L=2$ via the following
-
-The result given is, for learning rate $\eta=\frac{1}{L}$, and an $L$-smooth function $f$,
-
-\[f(x_K) - f(x^*) \leq \frac{L||x_0-x^*||_2^2}{2K}\]
+where $K\in\mathbb{N}$ is the iteration number.
 
 It is important to note that this is an estimate that gives the accuracy as $\mathcal{O}(\frac{1}{K})$.
-We can use it to compute the estimate the number of steps to required to reach $\epsilon=0.01$,
+We can use it to compute the estimate the number of steps to required to achieve accuracy $\epsilon=0.01$,
 but this will be an upper bound.
 Nonetheless, we can set the right-hand side to $\epsilon$ and rearrange to give:
 
-\[K = \frac{L||x_0-x^*||_2^2}{2\epsilon}\]
+\[K = \frac{L||\bm{x}_0-\bm{x}^*||_2^2}{2\epsilon}\]
 
-Substituting $\epsilon=0.01$, $x^*=(0,0)$, $x_0=(1,1)$, $L=2$, we get $K=200$.
+We can prove that the given function $f:\mathbb{R}^2\rightarrow\mathbb{R}$ defined
 
+\[f(x_1,x_2) = \frac{x_1^2}{2} + x_2^2\]
 
+is $L$-smooth with $L=2$ by observing
 
-\subsection{LGD}
+\[\nabla f(x_1, x_2) = (x_1, 2x_2),\]
+
+and,
+
+\begin{align*}
+    ||\nabla f(\bm{x}) - \nabla f(\bm{x}')||_2^2 & = (x_1-x_1')^2 + (2x_1-2x_1')^2 \\
+                                            & = (x_1-x_1')^2 + 4(x_1-x_1')^2 \\
+                                            & \leq 4(x_1-x_1')^2 + 4(x_1-x_1')^2 \\
+                                            & = 4||f(\bm{x}) - f(\bm{x}')||_2^2, \\
+\end{align*}
+
+which proves that,
+
+\[
+    ||\nabla f(\bm{x}) - \nabla f(\bm{x}')||_2 \leq 2||f(\bm{x}) - f(\bm{x}')||_2.
+\]
+
+Hence we substitute $\epsilon=0.01$, $x^*=(0,0)$, $x_0=(1,1)$, $L=2$ into the estimate for the number of steps required.
+We obtain $K=200$.
+
+In practice, the number is indeed much smaller; it was found to require just 3 iterations with the prescribed step size $\eta=0.5$.
+The left image in Figure \ref{fig:gradient_descent} shows the trajectory of this iterative solution.
+On the right, we see a very fast convergence of the value of the function $f$ towards its true global minimum zero.
+
+\begin{figure}[hp]
+    \includegraphics[scale=0.35]{figures/gradient_descent.png}
+    \caption{Results of Gradient Descent Algorithm}
+    \label{fig:gradient_descent}
+\end{figure}
+
+\subsection{Learned Gradient Descent}
+
+In this section, we compare the results of solving some linear inverse problem
+
+\begin{figure}[hp]
+    \includegraphics[scale=0.35]{figures/lgd.png}
+    \caption{Reconstruction of CT Scan Using Learned Gradient Descent Compared to Filtered Backprojection and Alternativ Direction Method of Multipliers}
+    \label{fig:lgd}
+\end{figure}
 
 
 

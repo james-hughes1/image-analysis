@@ -11,4 +11,4 @@ grad = lambda x: np.array([x[0], 2.0 * x[1]])
 # Perform gradient descent
 x0 = np.array([1.0, 1.0])
 lr = 0.5
-gradient_descent(obj, grad, x0, 0, 0.01, lr, 1000)
+gradient_descent(obj, grad, x0, 0, 0.01, lr, 1000, "gradient_descent")

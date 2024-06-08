@@ -7,8 +7,16 @@ import torch.nn as nn
 import odl
 import odl.contrib.torch as odl_torch
 import matplotlib.pyplot as plt
+import argparse
 
 from imagetools.plotting import plot_image
+
+# Parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-m", "--mode", type=str, choices=["demo", "full"], required=True
+)
+args = parser.parse_args()
 
 astra.test()
 
@@ -236,8 +244,28 @@ mse_loss = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(lgd_net.parameters(), lr=1e-4)
 num_epochs = 2000
 
+# Determine whether to continue training or create new model.
+if args.mode == "demo":
+    print(
+        "Loading model from /outputs/weights_1990.pth and training for 10"
+        " epochs."
+    )
+    ckpt = torch.load("outputs/weights_1990.pth", map_location=device)
+    lgd_net.load_state_dict(ckpt["state_dict"])
+    optimizer.load_state_dict(ckpt["optimizer"])
+    start_idx = 1989
+    losses = ckpt["losses"]
+    save_interval = 1
+    verbose_interval = 1
+
+else:
+    start_idx = 0
+    losses = []
+    save_interval = 10
+    verbose_interval = 100
+
 # Training loop
-for epoch in range(0, num_epochs):
+for epoch in range(start_idx, num_epochs):
     optimizer.zero_grad()
     """################## YOUR CODE HERE #################### """
     # You need to compute the reconstructed image by applying a forward pass
@@ -248,8 +276,20 @@ for epoch in range(0, num_epochs):
     loss.backward()
     optimizer.step()
 
-    if epoch % 100 == 0:
-        print("epoch = {}, loss = {}".format(epoch, loss.item()))
+    losses.append(loss.item())
+
+    if (epoch + 1) % save_interval == 0:
+        checkpoint = {
+            "epoch": epoch + 1,
+            "state_dict": lgd_net.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "losses": losses,
+        }
+        checkpoint_filepath = f"outputs/weights_{epoch+1:03d}.pth"
+        torch.save(checkpoint, checkpoint_filepath)
+
+    if (epoch + 1) % verbose_interval == 0:
+        print(f"epoch = {epoch+1}, loss = {loss.item():.5f}")
 
 lgd_recon_np = (
     recon.detach().cpu().numpy().squeeze()
@@ -259,11 +299,11 @@ lgd_recon_np = (
 # Let's display the reconstructed images by LGD and compare it with FBP and
 # ADMM
 
-fig, ax = plt.subplots(1, 4, figsize=(12, 6))
+fig, ax = plt.subplots(2, 2, figsize=(8, 8))
 
-plot_image(ax[0], phantom_np.T, "ground-truth", "bone")
-plot_image(ax[1], fbp_np.T, "FBP", "bone", gt=phantom_np.T)
-plot_image(ax[2], x_admm_np.T, "TV", "bone", gt=phantom_np.T)
-plot_image(ax[3], lgd_recon_np.T, "LGD", "bone", gt=phantom_np.T)
+plot_image(ax[0, 0], phantom_np.T, "ground-truth", "bone")
+plot_image(ax[0, 1], fbp_np.T, "FBP", "bone", gt=phantom_np.T)
+plot_image(ax[1, 0], x_admm_np.T, "TV", "bone", gt=phantom_np.T)
+plot_image(ax[1, 1], lgd_recon_np.T, "LGD", "bone", gt=phantom_np.T)
 
 plt.savefig("report/figures/lgd.png")
