@@ -1,3 +1,12 @@
+"""!@file inverse_problems.py
+@brief Script running code for questions 2.1, 2.2, 2.3, and 3.1.
+
+@details This script solves various inverse problems related to signal and
+image processing, employing various iterative strategies and signal
+transforms.
+@author Created by J. Hughes on 8th June 2024.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import skimage
@@ -122,10 +131,10 @@ plt.tight_layout()
 plt.savefig("report/figures/signal.png")
 
 data_random_recon, mse_random = iterative_soft_thresholding(
-    sample_random, lam=2e-2, n_iters=100, sample_freq=sample_freq, gt=data
+    sample_random, lam=2e-2, n_iters=100, gt=data
 )
 data_unif_recon, mse_unif = iterative_soft_thresholding(
-    sample_unif, lam=2e-2, n_iters=100, sample_freq=sample_freq, gt=data
+    sample_unif, lam=2e-2, n_iters=100, gt=data
 )
 
 signal_random_recon = ifft1c(data_random_recon) * sample_freq

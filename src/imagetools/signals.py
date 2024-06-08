@@ -1,5 +1,36 @@
+"""!@file signals.py
+@brief Module providing useful functions for image processing when employing
+Fourier and Wavelet transforms.
+
+@details Many of the functions are taken from the 'helper' module provided on
+the Image Analysis course GitLab page.
+@author Created by J. Hughes on 8th June 2024.
+"""
+
 import numpy as np
 import pywt
+
+
+def iterative_soft_thresholding(data_sampled, lam, n_iters, gt=None):
+    """!@brief Implements ISTA in 1D
+
+    @param data_sampled The subsampled measurement vector
+    @param lam The soft-thresholding (regularisation) parameter
+    @param n_iters Number of iterations
+    @param gt Ground truth measurements to compare to
+    @return predictions (N, P) array of centroids
+    """
+    data = data_sampled.copy()
+    mse_values = []
+    for i in range(n_iters):
+        signal = ifft1c(data)
+        if not (gt is None):
+            mse_values.append(np.linalg.norm(data - gt))
+        signal = ComplexSoftThresh(signal, lam=lam)  # Threshold
+        data = fft1c(signal)
+        # Data consistency step for measurements
+        data = data * (data_sampled == 0) + data_sampled
+    return data, mse_values
 
 
 # Functions taken from or adapted from the helper.py module
@@ -21,22 +52,6 @@ def ComplexSoftThresh(y, lam):
     res = abs(y) - lam
     cst = (res > 0.0) * res * y / abs(y)
     return cst
-
-
-def iterative_soft_thresholding(
-    data_sampled, lam, n_iters, sample_freq, gt=None
-):
-    data = data_sampled.copy()
-    mse_values = []
-    for i in range(n_iters):
-        signal = ifft1c(data)
-        if not (gt is None):
-            mse_values.append(np.linalg.norm(data - gt))
-        signal = ComplexSoftThresh(signal, lam=lam)  # Threshold
-        data = fft1c(signal)
-        # Data consistency step for measurements
-        data = data * (data_sampled == 0) + data_sampled
-    return data, mse_values
 
 
 def coeffs2img(LL, coeffs):

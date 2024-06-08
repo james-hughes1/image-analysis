@@ -1,12 +1,28 @@
+"""!@file ml.py
+@brief Module containing implementations of machine learning algorithms.
+
+@details Uses numpy to implement KMeans and Gradient Descent, in a way which
+is not as optimised as, say, scikit-learn, but is readable.
+@author Created by J. Hughes on 8th June 2024.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 class KMeans_Custom:
+    """!@brief Implements a class that handles KMeans Clustering."""
+
     def __init__(self, K):
         self.K = K
 
     def assignment(self, data):
+        """!@brief Assigns a matrix where each row represents the assigned
+        centroid.
+
+        @param data The data to assign labels to. Must be an (N, P) array.
+        @return labels
+        """
         N = data.shape[0]
         labels = np.zeros((N, self.K))
         for n in range(N):
@@ -16,9 +32,16 @@ class KMeans_Custom:
         return labels
 
     def fit(self, data, verbose=10, limit=1e5):
-        """D. MacKay, “An Example Inference Task: Clustering” in Information
-        Theory, Inference and Learning Algorithms, Cambridge University Press,
-        2003, ch. 20, pp. 284-292, Algorithm 20.2."""
+        """!@brief Fits the KMeans clusters.
+
+        @details Uses the KMeans++ algorithm to initialise centroids,
+        and then iteratively updates them using Lloyd's algorithm.
+
+        @param data The data to assign labels to. Must be an (N, P) array.
+        @param verbose How often to print out number of reassigned labels.
+        @param limit Maximum number of iterations before stopping. Prevents
+        an indefinite loop.
+        """
         rng = np.random.default_rng(seed=42)
 
         # Initialise problem variables
@@ -75,15 +98,41 @@ class KMeans_Custom:
         self.centroids = centroids
 
     def predict(self, data):
+        """!@brief Returns an array whose rows are the closest centroid to
+        each datum.
+
+        @param data The data to assign labels to. Must be an (N, P) array.
+        @return predictions (N, P) array of centroids
+        """
         labels = self.assignment(data)
         return labels @ self.centroids
 
     def predict_cluster(self, data):
+        """!@brief Returns an array whose entries are the closest centroid to
+        each datum, mapped to a single identifying integer.
+
+        @param data The data to assign labels to. Must be an (N, P) array.
+        @return predictions (N, 1) array of predicted clusters
+        """
         labels = self.assignment(data)
         return labels @ np.arange(self.K).reshape((-1, 1))
 
 
 def gradient_descent(obj, grad, x0, obj_min, eps, lr, max_iters, filename):
+    """!@brief Implements vanilla gradient descent for scalar functions on R2
+
+    @param obj The objective function to minimise.
+    @param grad The gradient of the objective function (R^2-->R^2)
+    @param x0 The initial iterate
+    @param obj_min The minimal value of the objective function
+    @param eps The threshold error for the stopping criterion
+    @param lr The learning rate
+    @param max_iters The maximum number of iterations to run before
+    terminating
+    @param filename Determines the name of the trajectory and loss plot
+    file
+    @return x estimated argmin (in R^2) of the objective
+    """
     x = x0
     iteration = 0
     x_1_values = [x0[0]]

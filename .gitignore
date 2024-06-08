@@ -7,5 +7,15 @@
 *.toc
 *.out
 
+# Docs
+docs/*
+!docs/Doxyfile
+!docs/html
+!docs/latex
+docs/html/*
+!docs/html/index.html
+docs/latex/*
+!docs/latex/refman.pdf
+
 # Miscellaneous
 *.pyc

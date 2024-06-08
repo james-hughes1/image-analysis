@@ -1,3 +1,10 @@
+"""!@file plotting.py
+@brief Module building on matplotlib to provide image-specific plotting
+functions.
+
+@author Created by J. Hughes on 8th June 2024.
+"""
+
 import numpy as np
 
 from skimage.metrics import peak_signal_noise_ratio as psnr

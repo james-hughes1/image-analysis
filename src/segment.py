@@ -1,3 +1,11 @@
+"""!@file segment.py
+@brief Script running code for segmentation problems.
+
+@details This script segments the three images given on the question sheet
+using three different segmentation algorithms.
+@author Created by J. Hughes on 8th June 2024.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import skimage

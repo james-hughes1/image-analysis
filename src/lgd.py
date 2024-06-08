@@ -1,3 +1,13 @@
+"""!@file lgd.py
+@brief Script for training LGD.
+
+@details Reconstructs CT images using FBP and ADMM, and compares to a
+data-driven LGD algorithm. Can be run in 'demo' mode, just performing the last
+10 epochs of training from a checkpoint, or 'full' mode which runs all 2000
+training epochs.
+@author Created by J. Hughes on 8th June 2024.
+"""
+
 # import libraries for CT and deep learning
 import numpy as np
 import astra
