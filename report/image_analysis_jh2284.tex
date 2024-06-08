@@ -1,7 +1,7 @@
 \documentclass[12pt]{article}
 
 \title{Image Analysis Coursework}
-\author{James Hughes\\ Word count: 0}
+\author{James Hughes\\ Word count: 2658}
 
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -24,7 +24,7 @@
 
 \subsection{CT Image}
 
-\begin{figure}[hp]
+\begin{figure}[htp]
     \includegraphics[scale=0.35]{figures/ct_segmentation.png}
     \caption{Steps of CT Segmentation}
     \label{fig:ct}
@@ -40,7 +40,7 @@ The four segmented regions of the image were then labelled, and the lungs chosen
 
 \subsection{Flowers Image}
 
-\begin{figure}[hp]
+\begin{figure}[htp]
     \includegraphics[scale=0.35]{figures/flowers_segmentation.png}
     \caption{Steps of Flowers Segmentation}
     \label{fig:flowers}
@@ -101,7 +101,7 @@ The algorithm highlighted the background of the image.
 Thus to get masks of the coins, the segmentation values were permuted in ${0,1}$ and the segmentation was again post-processed with a morphological closing operation.
 The masks were then labelled, and the correct labels were identified via `test pixels', which are seen marking the original image (top-left) in yellow in Figure \ref{fig:coins}
 
-\begin{figure}[hp]
+\begin{figure}[htp]
     \includegraphics[scale=0.35]{figures/coins_segmentation.png}
     \caption{Steps of Coins Segmentation}
     \label{fig:coins}
@@ -111,7 +111,7 @@ The masks were then labelled, and the correct labels were identified via `test p
 
 \subsection{Regression \& Outliers}
 
-\begin{figure}[hp]
+\begin{figure}[htp]
     \includegraphics[scale=0.5]{figures/regression_l2.png}
     \caption{L2 Regression}
     \label{fig:regression_l2}
@@ -172,13 +172,13 @@ We see that this method is much more robust against outliers, with similar coeff
 In addition, the coefficients found for the non-outlier case are fairly similar to the least squares coefficients.
 The downsides of this method are that the coefficients are somewhat sensitive to the choice of learning rate and initial coefficient.
 
-\begin{figure}[hp]
+\begin{figure}[htp]
     \includegraphics[scale=0.5]{figures/regression_l1.png}
     \caption{L1 Regression}
     \label{fig:regression_l1}
 \end{figure}
 
-\subsection{Undersampling}
+\subsection{Undersampling} \label{section:undersampling}
 
 In this part we reconstruct a sparse signal from two different samples of its transformation into k-space.
 We create a vector with only 10\% non-zero entries and then add a small amount of Gaussian noise to simulate a sparse signal.
@@ -189,7 +189,7 @@ We then Fourier transform this and take two 4-fold undersampling strategies:
 \end{itemize}
 In both cases, the non-sampled entries in k-space are masked with zeros.
 
-\begin{figure}[hp]
+\begin{figure}[htp]
     \includegraphics[scale=0.36]{figures/signal.png}
     \caption{Signals and measurements}
     \label{fig:signal}
@@ -210,6 +210,12 @@ In Figure \ref{fig:signal_reconstruct} we see the results of this reconstruction
 Importantly, the algorithm only had an effect on the signal that was inferred from the random sample of measurements.
 In this case, the algorithm improved the accuracy of the signal reconstruction,
 as shown by the L2 distance of the reconstructed measurements compared to the true measurements decreasing over time.
+
+\begin{figure}[htp]
+    \includegraphics[scale=0.5]{figures/signal_reconstruct.png}
+    \caption{Iterative Soft Thresholding Reconstructions}
+    \label{fig:signal_reconstruct}
+\end{figure}
 
 This case study serves as a demonstration of the power of Compressed Sensing,
 when done correctly.
@@ -236,13 +242,19 @@ This scheme leads to the `aliasing' effect that the Nyquist-Shannon sampling the
 Namely, by undersampling in this way, high frequency components in the data are confounded with low frequency components,
 consituting an irreversible loss of information.
 
-\begin{figure}[hp]
-    \includegraphics[scale=0.5]{figures/signal_reconstruct.png}
-    \caption{Iterative Soft Thresholding Reconstructions}
-    \label{fig:signal_reconstruct}
+\subsection{Wavelet Decomposition}
+
+\begin{figure}[htp]
+    \includegraphics[scale=0.35]{figures/river_img.png}
+    \caption{River Image and Reconstruction from Wavelet Decomposition}
+    \label{fig:river_img}
 \end{figure}
 
-\subsection{Wavelet Decomposition}
+\begin{figure}[htp]
+    \includegraphics[scale=0.5]{figures/wavelet_transform.png}
+    \caption{River Image and Reconstruction from Wavelet Decomposition}
+    \label{fig:wavelet_transform}
+\end{figure}
 
 In this part, we explore the relevance of sparsity to image processing.
 Figure \ref{fig:river_img} (left) shows an image which was passed through a Daubechies wavelet transform.
@@ -252,22 +264,28 @@ Crucially, the right-most image in Figure \ref{fig:river_img} shows that where t
 they are greatest in the main central part of the image (where this plot is brighter on average).
 The errors are generally smaller in the empty space around the image, although there is an unusual periodic pattern of errors here.
 
-\begin{figure}[hp]
-    \includegraphics[scale=0.35]{figures/river_img.png}
-    \caption{River Image and Reconstruction from Wavelet Decomposition}
-    \label{fig:river_img}
-\end{figure}
-
 Figure \ref{fig:wavelet_transform} shows the wavelet transform of the river image.
-On the left we see the original coefficients \footnote{clipped in the 0.5-99.5\% range to improve visibility},
+On the left we see the original coefficients\footnote{clipped in the 0.5-99.5\% range to improve visibility},
 while the right hand side indicates which of these lie in the top 15\% of coefficients.
 We see that even removing 85\% of the expressive range of the coefficients in the wavelet domain,
 the representation still encodes meaningful features relating to the image - this is a sparse representation of the image.
 
-\begin{figure}[hp]
-    \includegraphics[scale=0.5]{figures/wavelet_transform.png}
-    \caption{River Image and Reconstruction from Wavelet Decomposition}
-    \label{fig:wavelet_transform}
+\begin{figure}[htp]
+    \includegraphics[scale=0.35]{figures/river_img_compressed_0.025.png}
+    \caption{Compression from removing 97.5\% of wavelet information}
+    \label{fig:river_3pct}
+\end{figure}
+
+\begin{figure}[htp]
+    \includegraphics[scale=0.35]{figures/river_img_compressed_0.100.png}
+    \caption{Compression from removing 90.0\% of wavelet information}
+    \label{fig:river_10pct}
+\end{figure}
+
+\begin{figure}[htp]
+    \includegraphics[scale=0.35]{figures/river_img_compressed_0.200.png}
+    \caption{Compression from removing 80.0\% of wavelet information}
+    \label{fig:river_20pct}
 \end{figure}
 
 As a result, zero-filling coefficients whose absolute value is below this threshold and then performing the inverse transform produces an image which is highly faithful to the original,
@@ -275,24 +293,6 @@ but also requires dramatically less digital storage space, if we properly exploi
 This is the essence of image compression techniques.
 The results of this compression can be seen at different threshold values in Figures \ref{fig:river_3pct}, \ref{fig:river_10pct}, and \ref{fig:river_20pct},
 with more examples in the \texttt{/report/figures} folder.
-
-\begin{figure}[hp]
-    \includegraphics[scale=0.35]{figures/river_img_compressed_0.025.png}
-    \caption{Compression from removing 97.5\% of wavelet information}
-    \label{fig:river_3pct}
-\end{figure}
-
-\begin{figure}[hp]
-    \includegraphics[scale=0.35]{figures/river_img_compressed_0.100.png}
-    \caption{Compression from removing 90.0\% of wavelet information}
-    \label{fig:river_10pct}
-\end{figure}
-
-\begin{figure}[hp]
-    \includegraphics[scale=0.35]{figures/river_img_compressed_0.200.png}
-    \caption{Compression from removing 80.0\% of wavelet information}
-    \label{fig:river_20pct}
-\end{figure}
 
 Strikingly, we see that even the extreme compression in Figure \ref{fig:river_3pct} is fairly faithful visually to the original.
 However, the more intense the compression process, the further the image is degraded.
@@ -348,23 +348,55 @@ In practice, the number is indeed much smaller; it was found to require just 3 i
 The left image in Figure \ref{fig:gradient_descent} shows the trajectory of this iterative solution.
 On the right, we see a very fast convergence of the value of the function $f$ towards its true global minimum zero.
 
-\begin{figure}[hp]
-    \includegraphics[scale=0.35]{figures/gradient_descent.png}
+\begin{figure}[htp]
+    \includegraphics[scale=0.5]{figures/gradient_descent.png}
     \caption{Results of Gradient Descent Algorithm}
     \label{fig:gradient_descent}
 \end{figure}
 
 \subsection{Learned Gradient Descent}
 
-In this section, we compare the results of solving some linear inverse problem
+In this section, we compare the results of solving some linear inverse problem using a classical direct approach,
+a model-based minimisation, and a data-driven method.
+The particular problem is that of the reconstruction of a medical image from a sinogram,
+which is the set of measurements taken by a computed tomography scan.
+The forward operator in this case is the linear `Radon transform'.
 
-\begin{figure}[hp]
-    \includegraphics[scale=0.35]{figures/lgd.png}
-    \caption{Reconstruction of CT Scan Using Learned Gradient Descent Compared to Filtered Backprojection and Alternativ Direction Method of Multipliers}
+The simplest way to achieve a reasonable reconstruction is to use the filtered backprojection (FBP) algorithm.
+The FBP applies a 1D `ramp' filter to measurements in the sinogram,
+thereby upweighting its high-frequency components,
+and then applies the adjoint operator to approximate the inverse of the forward projection,
+yielding an image.
+
+\begin{figure}[htp]
+    \includegraphics[scale=0.65]{figures/lgd.png}
+    \caption{Reconstruction of CT Scan Using Learned Gradient Descent Compared to Filtered Backprojection and Alternative Direction Method of Multipliers}
     \label{fig:lgd}
 \end{figure}
 
+Secondly the Alternative Direction Method of Multipliers (ADMM) algorith was used.
+This is an iterative, model-based approach that minimises an objective which is composed of an L2 fidelity term, plus an L1 regularisation term.
+We already saw this problem solved earlier in Section \ref{section:undersampling}.
+However, in the earlier signal processing problem, the underlying signal (the goal of reconstruction) was the sparse representation,
+and therefore the subject of the L1 regularisation, permitting a simple Iterative Soft-Thresholding strategy.
+In this case, it is instead a linear transform of the signal (the image) -- namely its total variation -- which is regularised,
+so that a more sophisticated solution is required.
+ADMM utilises variable splitting and reframes the problem in terms of minimising the objective with respect to $(x, z)$,
+where $x$ is the image and the constraint $\nabla x - z =0$ forces $z$ to be the total variation term.
+The approximate solution is then found by minimising the `augmented Lagrangian', which is closely related to the original objective,
+by alternating between optimising $x$, $z$, and a third `dual' variable introduced by the Lagrangian.
 
+Both of the previous strategies have strong pre-suppositions of the imaging physics embedded into them.
+In the ADMM approach for instance, we can draw an equivalence between the use of total variation regularisation,
+and employing a prior distribution on $x$ which asserts that the image is likely to belong to a manifold of low-noise images with respect to the L1 TV score.
+Learned Gradient Descent (LGD) is, by contrast, a data-driven approach which, heuristically, `learns' the regularisation based on its exposure to samples of ground truth images.
+This means that this embedded bias of the model can be fine-tuned more closely to the specific class of images that are relevant.
+On the other hand, it makes the model much less transparent and prohibits certain theoretical guarantees that are present with the earlier approaches.
+
+Figure \ref{fig:lgd} shows a comparison of all three image reconstructions.
+We can see that the LGD performs the best both quantitatively,
+and in terms of mitigating the reconstruction artifacts that affect the other two appraoches.
+However, this is a completely unfair comparison due to the model being trained, and then evaluated, on the same single image.
 
 \bibliographystyle{IEEEtran}
 \bibliography{Biblio}
@@ -372,5 +404,8 @@ In this section, we compare the results of solving some linear inverse problem
 \appendix
 
 \section{Statement on the use of auto-generation tools}
+
+Auto-generation tools, such as GitHub or Microsoft Copilot, were not used at any stage during the development of the code within the repository of this project.
+Similarly, none of the content of this report was produced -- or proofread -- by modern Large Language Models such as ChatGPT at any point.
 
 \end{document}
