@@ -122,10 +122,10 @@ plt.tight_layout()
 plt.savefig("report/figures/signal.png")
 
 data_random_recon, mse_random = iterative_soft_thresholding(
-    sample_random, lam=1e-3, n_iters=100, sample_freq=sample_freq, gt=signal
+    sample_random, lam=2e-2, n_iters=100, sample_freq=sample_freq, gt=data
 )
 data_unif_recon, mse_unif = iterative_soft_thresholding(
-    sample_unif, lam=1e-3, n_iters=100, sample_freq=sample_freq, gt=signal
+    sample_unif, lam=2e-2, n_iters=100, sample_freq=sample_freq, gt=data
 )
 
 signal_random_recon = ifft1c(data_random_recon) * sample_freq
@@ -142,11 +142,11 @@ ax[0, 1].legend()
 ax[0, 1].set_title("Reconstructed Signal: Equidistant")
 ax[1, 0].plot(mse_random)
 ax[1, 0].set(
-    title="L2 Loss of Signal Reconstruction", xlabel="Iteration", ylabel="Loss"
+    title="L2 Loss of Data Reconstruction", xlabel="Iteration", ylabel="Loss"
 )
 ax[1, 1].plot(mse_unif)
 ax[1, 1].set(
-    title="L2 Loss of Signal Reconstruction", xlabel="Iteration", ylabel="Loss"
+    title="L2 Loss of Data Reconstruction", xlabel="Iteration", ylabel="Loss"
 )
 plt.tight_layout()
 plt.savefig("report/figures/signal_reconstruct.png")
@@ -171,10 +171,31 @@ plot_image(
 plt.tight_layout()
 plt.savefig("report/figures/river_img.png")
 
-for fr in [0.2, 0.15, 0.1, 0.05, 0.025]:
+# Show the effect of thresholding the wavelet decomposition by the top 15% of
+# values.
+river_img_dw = dwt2(river_img)
+th = np.quantile(abs(river_img_dw), 0.85)
+river_img_dw_th = abs(river_img_dw) > th
+
+plotrange = (
+    np.quantile(abs(river_img_dw), 0.005),
+    np.quantile(abs(river_img_dw), 0.995),
+)
+
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+aximg0 = ax[0].imshow(abs(river_img_dw), vmin=plotrange[0], vmax=plotrange[1])
+ax[0].set_title("Wavelet Transform")
+fig.colorbar(aximg0, ax=ax[0])
+aximg1 = ax[1].imshow(abs(river_img_dw_th), cmap="grey")
+ax[1].set_title("Wavelet Transform: Top 15%")
+plt.tight_layout()
+plt.savefig("report/figures/wavelet_transform.png")
+
+# Plot reconstructions with different coefficient thresholds
+for fr in [0.2, 0.15, 0.1, 0.05, 0.025, 0.01]:
     river_img_dw = dwt2(river_img)
-    th = np.quantile(river_img_dw, 1 - fr)
-    river_img_dw = np.clip(river_img_dw, th, None)
+    th = np.quantile(abs(river_img_dw), 1 - fr)
+    river_img_dw = river_img_dw * (abs(river_img_dw) > th)
     river_img_recon = idwt2(river_img_dw)
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
 

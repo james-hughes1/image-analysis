@@ -31,9 +31,7 @@ def iterative_soft_thresholding(
     for i in range(n_iters):
         signal = ifft1c(data)
         if not (gt is None):
-            mse_values.append(
-                0.5 * np.sum(abs(signal * sample_freq - gt) ** 2)
-            )
+            mse_values.append(np.linalg.norm(data - gt))
         signal = ComplexSoftThresh(signal, lam=lam)  # Threshold
         data = fft1c(signal)
         # Data consistency step for measurements
