@@ -178,7 +178,4 @@ dependencies:
   - zfp=1.0.0
   - zlib=1.2.13
   - zstd=1.5.5
-  - pip:
-      - future==1.0.0
-      - odl==1.0.0.dev0
 prefix: /home/jhughes2712/miniconda3/envs/image_analysis

@@ -10,6 +10,18 @@ First reproduce the development environment using conda by running
 
 `conda env create -f environment.yml`
 
+`conda activate image_analysis`
+
+`pip3 install https://github.com/odlgroup/odl/archive/master.zip`
+
+Docker can also be used by running
+
+`docker build -t ia_jh2284 .`, then
+
+`docker run --rm -ti ia_jh2284`,
+
+although the `lgd.py` script cannot be run in this container.
+
 Then the main code scripts can be run as follows:
 
 `python src/segment.py` runs the segmentation code,
