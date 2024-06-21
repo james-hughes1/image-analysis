@@ -28,6 +28,7 @@ from skimage.measure import regionprops
 
 
 # CT Lung segmentation
+print("Segmenting CT image...")
 fig, ax = plt.subplots(2, 3, figsize=(15, 10))
 
 # Import
@@ -65,7 +66,10 @@ for p in itertools.product(list(range(2)), list(range(3))):
 plt.tight_layout()
 plt.savefig("report/figures/ct_segmentation.png")
 
+print("Done. Saved in report/figures/.")
+
 # Coins segmentation
+print("Segmenting coins image...")
 fig, ax = plt.subplots(2, 3, figsize=(15, 10))
 
 # Import
@@ -115,7 +119,10 @@ for p in itertools.product(list(range(2)), list(range(3))):
 plt.tight_layout()
 plt.savefig("report/figures/coins_segmentation.png")
 
+print("Done. Saved in report/figures/.")
+
 # Flowers segmentation
+print("Segmenting flowers image...")
 fig, ax = plt.subplots(2, 3, figsize=(15, 10))
 
 # Import
@@ -156,3 +163,5 @@ for p in itertools.product(list(range(2)), list(range(3))):
 
 plt.tight_layout()
 plt.savefig("report/figures/flowers_segmentation.png")
+
+print("Done. Saved in report/figures/.")

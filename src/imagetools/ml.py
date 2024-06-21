@@ -54,12 +54,19 @@ class KMeans_Custom:
         # Symposium on Discrete Algorithms, ser. SODA ’07. USA: Society for
         # Industrial and Applied Mathematics, 2007, pp. 1027–1035
         # -----------------------------------------------------------
+
         centroids = np.zeros((self.K, P))
+        # Choose first centroid randomly
         centroids[0, :] = data[rng.choice(list(range(N))), :]
         for k in range(1, self.K):
+            # Find Nxk matrix of distances of data points to the k centroids
+            # already chosen.
             distances_k = np.zeros((N, k))
             for j in range(k):
                 distances_k[:, j] = np.sum((data - centroids[j]) ** 2, axis=1)
+            # Probability of data point x_i being chosen is proportional to
+            # the squared distance to the closest centroid already chosen,
+            # hence favouring 'spread-out' centroids.
             prob = np.min(distances_k, axis=1)
             prob /= np.sum(prob)
             centroids[k, :] = data[rng.choice(list(range(N)), p=prob), :]
@@ -77,6 +84,8 @@ class KMeans_Custom:
 
         converged = False
         iteration = 0
+        # Loop until no more reassignments, or iteration limit reached.
+        print("Commencing KMeans fitting...")
         while not converged and iteration < limit:
             iteration += 1
             if not iteration % verbose:
@@ -119,7 +128,8 @@ class KMeans_Custom:
 
 
 def gradient_descent(obj, grad, x0, obj_min, eps, lr, max_iters, filename):
-    """!@brief Implements vanilla gradient descent for scalar functions on R2
+    """!@brief Implements vanilla gradient descent for scalar functions on R2,
+    where the true global minimum is known.
 
     @param obj The objective function to minimise.
     @param grad The gradient of the objective function (R^2-->R^2)
@@ -138,6 +148,7 @@ def gradient_descent(obj, grad, x0, obj_min, eps, lr, max_iters, filename):
     x_1_values = [x0[0]]
     x_2_values = [x0[1]]
     obj_values = [obj(x0)]
+    # Loop until error less than or equal to eps., or max. iterations reached.
     while obj(x) - obj_min > eps and iteration < max_iters:
         iteration += 1
         x -= lr * grad(x)

@@ -12,6 +12,14 @@ from skimage.metrics import structural_similarity as ssim
 
 
 def plot_image(ax_sp, img, title, cmap, gt=None):
+    """!@brief Plots an image and compares to GT
+
+    @param ax_sp Specified matplotlib.pyplot.Axes object
+    @param img Image to be displayed
+    @param title Image title string
+    @param cmap String defining matplotlib colormap for image
+    @param gt Ground truth measurements to compare to
+    """
     ax_sp.imshow(img, cmap=cmap)
     ax_sp.set_xticks([])
     ax_sp.set_yticks([])

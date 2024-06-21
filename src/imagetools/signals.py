@@ -18,7 +18,9 @@ def iterative_soft_thresholding(data_sampled, lam, n_iters, gt=None):
     @param lam The soft-thresholding (regularisation) parameter
     @param n_iters Number of iterations
     @param gt Ground truth measurements to compare to
-    @return predictions (N, P) array of centroids
+    @return data Approximated reconstructed measurements
+    @return mse_values Series of mse values per iteration to enable
+    performance plot
     """
     data = data_sampled.copy()
     mse_values = []

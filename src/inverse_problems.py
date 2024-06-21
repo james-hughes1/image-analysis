@@ -23,6 +23,7 @@ from imagetools.ml import gradient_descent
 from imagetools.plotting import plot_image
 
 # --- L1 and L2 Regression --- #
+print("Performing regression tasks...")
 # Import data
 with open("data/y_line.txt") as f:
     file_list = f.read().split("\n")[:-1]
@@ -84,7 +85,10 @@ ax[1].set_title(f"a={B_outlier[0]:.4f} b={B_outlier[1]:.4f}")
 plt.tight_layout()
 plt.savefig("report/figures/regression_l1.png")
 
+print("Done. Saved in report/figures/.")
+
 # --- Sparse Signal Reconstruction --- #
+print("Performing sparse signal reconstruction via ISTA...")
 # Create a sparse signal with small Gaussian noise.
 rng = np.random.default_rng(seed=42)
 signal = np.zeros(100)
@@ -114,6 +118,7 @@ sample_unif = mask_unif * data
 signal_random = ifft1c(sample_random) * sample_freq
 signal_unif = ifft1c(sample_unif) * sample_freq
 
+# Plot original samples and estimated signals
 fig, ax = plt.subplots(2, 3, figsize=(15, 10))
 ax[0, 0].plot(abs(data))
 ax[0, 0].set_title("Measurements")
@@ -130,6 +135,7 @@ ax[1, 2].set_title("Signal from Equidistant Sample")
 plt.tight_layout()
 plt.savefig("report/figures/signal.png")
 
+# Perform ISTA on both subsampled measurements
 data_random_recon, mse_random = iterative_soft_thresholding(
     sample_random, lam=2e-2, n_iters=100, gt=data
 )
@@ -140,6 +146,7 @@ data_unif_recon, mse_unif = iterative_soft_thresholding(
 signal_random_recon = ifft1c(data_random_recon) * sample_freq
 signal_unif_recon = ifft1c(data_unif_recon) * sample_freq
 
+# Plot estimated signals
 fig, ax = plt.subplots(2, 2, figsize=(10, 10))
 ax[0, 0].plot(abs(signal_random_recon), label="random")
 ax[0, 0].plot(abs(signal), label="gt")
@@ -160,12 +167,15 @@ ax[1, 1].set(
 plt.tight_layout()
 plt.savefig("report/figures/signal_reconstruct.png")
 
+print("Done. Saved in report/figures/.")
+
 # --- Image Compression via Wavelet Decomposition --- #
+print("Performing image compression task...")
 # Read image
 river_img = skimage.io.imread("data/river_side.jpeg")
 river_img = rgb2gray(river_img)
 
-# Wavelet transform, and then the inverse
+# Wavelet transform, and then invert
 river_img_dw = dwt2(river_img)
 river_img_recon = idwt2(river_img_dw)
 
@@ -223,7 +233,10 @@ for fr in [0.2, 0.15, 0.1, 0.05, 0.025, 0.01]:
     plt.tight_layout()
     plt.savefig(f"report/figures/river_img_compressed_{fr:.3f}.png")
 
+print("Done. Saved in report/figures/.")
+
 # --- Gradient Descent Convergence --- #
+print("Performing gradient descent task...")
 # Define specific objective function, its gradient, and gradient descent step
 obj = lambda x: 0.5 * (x[0] ** 2) + (x[1] ** 2)
 grad = lambda x: np.array([x[0], 2.0 * x[1]])
@@ -235,3 +248,5 @@ eps = 0.01
 obj_min = 0.0
 n_iters = 1000
 gradient_descent(obj, grad, x0, obj_min, eps, lr, n_iters, "gradient_descent")
+
+print("Done. Saved in report/figures/.")
