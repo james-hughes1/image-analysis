@@ -6,7 +6,7 @@ Contains software that demonstrates various techniques related to image analysis
 
 ## How to use the software
 
-First reproduce the development environment using conda by running
+First reproduce the development environment using conda and pip by running the following commands in order:
 
 `conda env create -f environment.yml`
 
