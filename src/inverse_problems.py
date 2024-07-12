@@ -36,20 +36,24 @@ with open("data/y_outlier_line.txt") as f:
 x = np.arange(len(y_noisy))
 
 # L2 optimisation
-a_noisy_l2 = np.sum(x * y_noisy) / np.sum(x * x)
+a_noisy_l2 = np.sum((x - np.mean(x)) * (y_noisy - np.mean(y_noisy))) / np.sum(
+    (x - np.mean(x)) ** 2
+)
 b_noisy_l2 = np.mean(y_noisy) - a_noisy_l2 * np.mean(x)
 
-a_outlier_l2 = np.sum(x * y_outlier) / np.sum(x * x)
+a_outlier_l2 = np.sum(
+    (x - np.mean(x)) * (y_outlier - np.mean(y_outlier))
+) / np.sum((x - np.mean(x)) ** 2)
 b_outlier_l2 = np.mean(y_outlier) - a_outlier_l2 * np.mean(x)
 
 # Plot
 fig, ax = plt.subplots(1, 2, figsize=(10, 5))
 ax[0].scatter(x, y_noisy)
 ax[0].plot(x, a_noisy_l2 * x + b_noisy_l2)
-ax[0].set_title(f"a={a_noisy_l2:.4f} b={a_noisy_l2:.4f}")
+ax[0].set_title(f"a={a_noisy_l2:.4f} b={b_noisy_l2:.4f}")
 ax[1].scatter(x, y_outlier)
 ax[1].plot(x, a_outlier_l2 * x + b_outlier_l2)
-ax[1].set_title(f"a={a_outlier_l2:4f} b={a_outlier_l2:.4f}")
+ax[1].set_title(f"a={a_outlier_l2:4f} b={b_outlier_l2:.4f}")
 plt.tight_layout()
 plt.savefig("report/figures/regression_l2.png")
 

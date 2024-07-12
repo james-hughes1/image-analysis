@@ -136,7 +136,7 @@ This is a well-posed optimisation problem that has an analytic solution, and als
 This is due to the objective loss function being differentiable and strictly convex; indeed,
 \[\text{minimise } \sum_{i=1}^{n}{(ax_i+b-y_i)^2} \quad \text{subject to } (a, b)\in\mathbb{R}^2\]
 is therefore solved exactly by finding the unique argument for which the objectives gradient is zero,
-\[a^*=\frac{\sum x_i y_i}{\sum x_i^2},\quad b^*=\bar{y} - a^*\bar{x}\]
+\[a^*=\frac{\sum (x_i-\bar{x}) (y_i-\bar{y})}{\sum (x_i-\bar{x})^2},\quad b^*=\bar{y} - a^*\bar{x}\]
 
 The original data and L2 regression models are plotted in Figure \ref{fig:regression_l2}.
 Comparing the two models, we can see evidence that the least squares coefficients are quite sensitive to outliers.
@@ -182,7 +182,7 @@ namely
 
 which in turn gave the subgradient
 
-\[x\mapsto(x^T\text{sgn}(ax+b-y), \text{sgn}(ax+b-y))\]
+\[x\mapsto(x^T\text{sgn}(ax+b-y), 1^T\text{sgn}(ax+b-y))\]
 
 where $\text{sgn}$ is applied elementwise.
 The results of the Subgradient Method regression are shown in Figure \ref{fig:regression_l1}.
